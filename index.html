@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <style>
+      body { font-family: sans-serif; }
+      textarea { max-width: 100%; }
+    </style>
+  </head>
+  <body>
+    <h2>Get balances for multiple oasis addresses</h2>
+
+    <form
+      id="form"
+      autocomplete="off"
+      autocapitalize="off"
+      autocorrect="off"
+      spellcheck="false"
+    >
+      <label>
+        Enter addresses:
+        <br>
+        <textarea
+          id="addresses"
+          rows="20"
+          cols="150"
+          autocomplete="off"
+          autocapitalize="off"
+          autocorrect="off"
+          spellcheck="false"
+        >
+oasis1qzhtdc2pvcqag4zuse3uk7yx8te9ladgas5p2u9n
+
+oasis1qztz99mdtcjae9lm2zwrqkfuynkaxfthwyq6wexr
+        </textarea>
+      </label>
+      <br>
+      <input type="submit">
+    </form>
+    <pre id="out">--</pre>
+
+    <hr>
+    <p>
+      <a href="https://github.com/lukaw3d/oasis-get-balances">Source code</a>
+    </p>
+
+    <script>
+      window.form.addEventListener('submit', async event => {
+        event.preventDefault()
+        try {
+          const addresses = window.addresses.value.replace(/ /g, '').split('\n').filter(a => a)
+          if (!addresses.every(a => a.startsWith('oasis1'))) throw new Error('Bad address')
+          window.out.textContent = ``
+
+          window.out.textContent += `\n`
+          window.out.textContent += `Testnet balances...\n`
+          for (const a of addresses) {
+            const balance = (await (await fetch(`https://api.oasisscan.com/testnet/chain/account/info/${a}`)).json()).data.total
+            window.out.textContent += `${a}\t${balance} TEST\n`
+          }
+
+          window.out.textContent += `\n`
+          window.out.textContent += `Mainnet balances...\n`
+          for (const a of addresses) {
+            const balance = (await (await fetch(`https://api.oasisscan.com/mainnet/chain/account/info/${a}`)).json()).data.total
+            window.out.textContent += `${a}\t${balance} ROSE\n`
+          }
+
+          window.out.textContent += `\nDone`
+        } catch (err) {
+          window.out.textContent = err
+        }
+      })
+    </script>
+  </body>
+</html>
